@@ -41,7 +41,24 @@ def accept_clients():
         client_socket, addr = server_socket.accept()
         print(f"[INFO] Connection from {addr}")
 
-        client_type = client_socket.recv(1024).decode("utf-8").strip()
+        
+        data = client_socket.recv(1024)
+        if not data:
+            print("[ERROR] Received empty data. Closing connection.")
+            client_socket.close()
+            return
+
+        print(f"[DEBUG] Raw data received: {data}")  # Print raw bytes before decoding
+
+        try:
+            client_type = data.decode("utf-8").strip()
+            print(f"[INFO] Client identified as: {client_type}")
+        except UnicodeDecodeError as e:
+            print(f"[ERROR] UnicodeDecodeError: {e}, raw data: {data}")
+            client_socket.close()
+            return
+
+
         if client_type in ["pi", "unity"]:
             clients[client_type] = client_socket
             print(f"[INFO] {client_type} connected.")
