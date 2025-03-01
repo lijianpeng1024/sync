@@ -16,9 +16,9 @@ def handle_client(client_socket, client_type):
             if not data:
                 break  # Connection closed
 
-            if client_type == "pi" and "unity" in clients:
-                clients["unity"].sendall(data)  # Forward data to Unity
-            elif client_type == "unity" and "pi" in clients:
+            if client_type == "pi" and "un" in clients:
+                clients["un"].sendall(data)  # Forward data to Unity
+            elif client_type == "un" and "pi" in clients:
                 clients["pi"].sendall(data)  # Forward data to Pi
     except Exception as e:
         print(f"[ERROR] {client_type} connection lost: {e}")
@@ -41,25 +41,8 @@ def accept_clients():
         client_socket, addr = server_socket.accept()
         print(f"[INFO] Connection from {addr}")
 
-        
-        data = client_socket.recv(1024)
-        if not data:
-            print("[ERROR] Received empty data. Closing connection.")
-            client_socket.close()
-            return
-
-        print(f"[DEBUG] Raw data received: {data}")  # Print raw bytes before decoding
-
-        try:
-            client_type = data.decode("utf-8").strip()
-            print(f"[INFO] Client identified as: {client_type}")
-        except UnicodeDecodeError as e:
-            print(f"[ERROR] UnicodeDecodeError: {e}, raw data: {data}")
-            client_socket.close()
-            return
-
-
-        if client_type in ["pi", "unity"]:
+        client_type = client_socket.recv(2).decode("utf-8").strip()
+        if client_type in ["pi", "un"]:
             clients[client_type] = client_socket
             print(f"[INFO] {client_type} connected.")
             threading.Thread(target=handle_client, args=(client_socket, client_type), daemon=True).start()
