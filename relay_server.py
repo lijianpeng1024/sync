@@ -41,7 +41,7 @@ def accept_clients():
         client_socket, addr = server_socket.accept()
         print(f"[INFO] Connection from {addr}")
 
-        client_type = client_socket.recv(2).decode("utf-8").strip()
+        client_type = client_socket.recv(3).decode("utf-8").strip()
         if client_type in ["pi", "un"]:
             clients[client_type] = client_socket
             print(f"[INFO] {client_type} connected.")
